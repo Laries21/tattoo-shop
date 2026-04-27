@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Explore Designs — Clarity Tattoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="bg-floats"></div>
+<div class="watermark">✦ Ramesh Balu</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/" class="navbar-logo" style="display:flex;align-items:center;gap:10px;">
+    <img src="/uploads/images/logo/clarity-logo.png" alt="Clarity Tattoo"
+         class="navbar-logo-img" onerror="this.style.display='none'">
+    <span>Clarity Tattoo</span>
+  </a>
+  <button class="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/tattoos">Explore Tattoos</a>
+    <a href="/tattoos" class="btn btn-primary btn-sm">Book Now</a>
+    <a href="/booking-status">Track Booking</a>
+    <a href="/admin/login" title="Studio Portal" style="font-size:1.1rem;opacity:0.5;">⚙</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border);padding:48px 60px 40px;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <h1 style="color:var(--text-primary);font-size:2.5rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:12px;">
+      Explore Our <span style="color:var(--accent);">Designs</span>
+    </h1>
+    <p style="color:var(--text-muted);font-size:1rem;max-width:560px;line-height:1.7;">
+      Browse our full collection of tattoo designs. Find the one that speaks to you and book your session today.
+    </p>
+  </div>
+</div>
+
+<!-- TATTOO GRID -->
+<div class="section">
+  <!-- Empty state -->
+  <div th:if="${tattoos == null or tattoos.isEmpty()}"
+       style="text-align:center;padding:80px 20px;">
+    <div style="font-size:3rem;margin-bottom:16px;">🎨</div>
+    <h3 style="color:var(--text-primary);margin-bottom:8px;">No designs yet</h3>
+    <p style="color:var(--text-muted);">Check back soon — our artists are working on something amazing.</p>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-cards" th:unless="${tattoos == null or tattoos.isEmpty()}">
+    <div class="card" th:each="t : ${tattoos}">
+      <!-- Image -->
+      <img th:if="${t.imageUrl != null and !t.imageUrl.isEmpty()}"
+           th:src="${t.imageUrl}" th:alt="${t.designName}" class="card-img">
+      <div th:unless="${t.imageUrl != null and !t.imageUrl.isEmpty()}"
+           class="card-img-placeholder">
+        <span>🖋️ No Image</span>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px;">
+          <h3 class="card-title" th:text="${t.designName}">Design Name</h3>
+          <span class="card-style" th:text="${t.style}">Style</span>
+        </div>
+        <p class="card-desc"
+           th:text="${t.description != null and !t.description.isEmpty() ? t.description : 'A beautiful custom tattoo design crafted by our expert artists.'}">
+          Description
+        </p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:16px;">
+          <span class="card-price">₹<span th:text="${t.price}">0</span></span>
+          <a th:href="@{/book/{id}(id=${t.id})}" class="btn btn-primary btn-sm">Book Now</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/tattoos">Explore Tattoos</a>
+    <a href="/booking-status">Track Booking</a>
+    <a href="/admin/login" title="Studio Portal" style="opacity:0.5;">⚙</a>
+  </div>
+  <p>© 2026 Clarity Tattoo. All rights reserved.</p>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

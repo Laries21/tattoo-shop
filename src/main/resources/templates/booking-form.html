@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Book Your Tattoo — Clarity Tattoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="bg-floats"></div>
+<div class="watermark">✦ Ramesh Balu</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/" class="navbar-logo" style="display:flex;align-items:center;gap:10px;">
+    <img src="/uploads/images/logo/clarity-logo.png" alt="Clarity Tattoo"
+         class="navbar-logo-img" onerror="this.style.display='none'">
+    <span>Clarity Tattoo</span>
+  </a>
+  <button class="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/tattoos">Explore Tattoos</a>
+    <a href="/booking-status">Track Booking</a>
+    <a href="/admin/login" title="Studio Portal" style="font-size:1.1rem;opacity:0.5;">⚙</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border);padding:40px 60px 32px;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <h1 style="color:var(--text-primary);font-size:2rem;font-weight:800;letter-spacing:-0.02em;margin-bottom:8px;">
+      Book Your <span style="color:var(--accent);">Session</span>
+    </h1>
+    <p style="color:var(--text-muted);">Fill in your details below and we'll confirm your appointment.</p>
+  </div>
+</div>
+
+<!-- BOOKING CONTENT -->
+<div class="section">
+  <div class="booking-layout">
+
+    <!-- LEFT: Tattoo Preview -->
+    <div class="tattoo-preview-card">
+      <img th:if="${tattoo.imageUrl != null and !tattoo.imageUrl.isEmpty()}"
+           th:src="${tattoo.imageUrl}" th:alt="${tattoo.designName}" class="tattoo-preview-img">
+      <div th:unless="${tattoo.imageUrl != null and !tattoo.imageUrl.isEmpty()}"
+           style="width:100%;height:280px;background:var(--bg-elevated);display:flex;align-items:center;justify-content:center;color:var(--text-muted);">
+        🖋️ No Image
+      </div>
+      <div class="tattoo-preview-body">
+        <h2 style="color:var(--text-primary);font-size:1.3rem;font-weight:700;margin-bottom:8px;"
+            th:text="${tattoo.designName}">Design Name</h2>
+        <span class="card-style" th:text="${tattoo.style}">Style</span>
+        <p style="color:var(--text-muted);font-size:0.9rem;margin:12px 0;line-height:1.6;"
+           th:text="${tattoo.description != null ? tattoo.description : 'A beautiful custom tattoo design.'}">Description</p>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:16px;">
+          <span style="color:var(--text-muted);font-size:0.85rem;">Starting from</span>
+          <span class="card-price">₹<span th:text="${tattoo.price}">0</span></span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Booking Form -->
+    <div class="form-box" style="max-width:100%;">
+      <h3 style="color:var(--text-primary);font-size:1.2rem;font-weight:700;margin-bottom:24px;">Your Details</h3>
+
+      <form action="/book" method="post" enctype="multipart/form-data">
+        <!-- Hidden tattoo ID -->
+        <input type="hidden" name="tattoo.id" th:value="${tattoo.id}">
+
+        <div class="form-group">
+          <label class="form-label" for="customerName">Full Name *</label>
+          <input type="text" id="customerName" name="customerName"
+                 class="form-control" placeholder="Enter your full name" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="phone">Phone Number *</label>
+          <input type="text" id="phone" name="phone"
+                 class="form-control" placeholder="10-digit mobile number"
+                 maxlength="10" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address *</label>
+          <input type="email" id="email" name="email"
+                 class="form-control" placeholder="your@email.com" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="referenceImage">Reference Image (optional)</label>
+          <input type="file" id="referenceImage" name="referenceImage"
+                 class="form-control" accept="image/jpeg,image/png,image/webp">
+          <span style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;display:block;">
+            Upload a reference image for your tattoo idea (JPEG, PNG, WebP — max 5MB)
+          </span>
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width:100%;margin-top:8px;">
+          Confirm Booking →
+        </button>
+      </form>
+    </div>
+
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/tattoos">Explore Tattoos</a>
+    <a href="/booking-status">Track Booking</a>
+  </div>
+  <p>© 2026 Clarity Tattoo. All rights reserved.</p>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

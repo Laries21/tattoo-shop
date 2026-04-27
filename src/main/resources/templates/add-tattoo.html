@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title th:text="${tattoo != null ? 'Edit Tattoo' : 'Add Tattoo'} + ' — Clarity Tattoo'">Add Tattoo — Clarity Tattoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <span class="sidebar-logo">✦ Clarity Tattoo</span>
+    <nav class="sidebar-nav">
+      <a href="/admin/dashboard">📊 Dashboard</a>
+      <a href="/admin/add-tattoo" class="active">➕ Add Tattoo</a>
+      <a href="/" style="color:var(--text-muted);">🏠 Home</a>
+      <a href="/" target="_blank" style="color:var(--text-muted);">🌐 View Website</a>
+      <a href="/admin/logout" style="color:var(--danger);">🚪 Logout</a>
+    </nav>
+  </aside>
+
+  <!-- MAIN CONTENT -->
+  <main class="main-content">
+    <div class="page-header">
+      <h1 class="page-title" th:text="${tattoo != null ? 'Edit Tattoo Design' : 'Add New Tattoo Design'}">
+        Add New Tattoo Design
+      </h1>
+      <a href="/admin/dashboard" class="btn btn-outline btn-sm">← Back to Dashboard</a>
+    </div>
+
+    <div class="form-box" style="max-width:600px;">
+
+      <!-- Current image preview (edit mode) -->
+      <div th:if="${tattoo != null and tattoo.imageUrl != null and !tattoo.imageUrl.isEmpty()}"
+           style="margin-bottom:20px;">
+        <label class="form-label">Current Image</label>
+        <img th:src="${tattoo.imageUrl}" th:alt="${tattoo.designName}"
+             style="width:100%;height:200px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+      </div>
+
+      <form th:action="${tattoo != null ? '/admin/edit-tattoo/' + tattoo.id : '/admin/add-tattoo'}"
+            method="post" enctype="multipart/form-data">
+
+        <div class="form-group">
+          <label class="form-label" for="designName">Design Name *</label>
+          <input type="text" id="designName" name="designName" class="form-control"
+                 placeholder="e.g. Dragon Sleeve, Rose Mandala"
+                 th:value="${tattoo != null ? tattoo.designName : ''}" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="style">Style *</label>
+          <input type="text" id="style" name="style" class="form-control"
+                 placeholder="e.g. Blackwork, Watercolor, Geometric"
+                 th:value="${tattoo != null ? tattoo.style : ''}" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="description">Description</label>
+          <textarea id="description" name="description" class="form-control"
+                    placeholder="Describe the tattoo design, inspiration, and details..."
+                    th:text="${tattoo != null ? tattoo.description : ''}"></textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="price">Price (₹) *</label>
+          <input type="number" id="price" name="price" class="form-control"
+                 placeholder="e.g. 2500" min="0" step="0.01"
+                 th:value="${tattoo != null ? tattoo.price : ''}" required>
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="image"
+                 th:text="${tattoo != null ? 'Replace Image (optional)' : 'Tattoo Image'}">
+            Tattoo Image
+          </label>
+          <input type="file" id="image" name="image" class="form-control"
+                 accept="image/jpeg,image/png,image/webp">
+          <span style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;display:block;">
+            JPEG, PNG, or WebP — max 5MB
+          </span>
+        </div>
+
+        <div style="display:flex;gap:12px;margin-top:8px;">
+          <button type="submit" class="btn btn-primary" style="flex:1;"
+                  th:text="${tattoo != null ? 'Update Tattoo' : 'Save Tattoo'}">
+            Save Tattoo
+          </button>
+          <a href="/admin/dashboard" class="btn btn-outline" style="flex:1;text-align:center;">
+            Cancel
+          </a>
+        </div>
+
+      </form>
+    </div>
+  </main>
+</div>
+
+<script src="/js/app.js"></script>
+</body>
+</html>

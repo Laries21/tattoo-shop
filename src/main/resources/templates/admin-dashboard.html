@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard — Clarity Tattoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="admin-layout">
+
+  <!-- ═══════════════════════════════════════════════════════
+       SIDEBAR
+  ═══════════════════════════════════════════════════════ -->
+  <aside class="sidebar">
+    <span class="sidebar-logo">✦ Clarity Tattoo</span>
+    <nav class="sidebar-nav">
+      <a href="/admin/dashboard" class="active">📊 Dashboard</a>
+      <a href="/admin/add-tattoo">➕ Add Tattoo</a>
+      <a href="/" style="color:var(--text-muted);">🏠 Home</a>
+      <a href="/" target="_blank" style="color:var(--text-muted);">🌐 View Website</a>
+      <a href="/admin/logout" style="color:var(--danger);">🚪 Logout</a>
+    </nav>
+  </aside>
+
+  <!-- ═══════════════════════════════════════════════════════
+       MAIN CONTENT
+  ═══════════════════════════════════════════════════════ -->
+  <main class="main-content">
+
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1 class="page-title">Dashboard</h1>
+      <a href="/admin/add-tattoo" class="btn btn-primary">+ Add Tattoo</a>
+    </div>
+
+    <!-- ── STATS ─────────────────────────────────────────── -->
+    <div class="stats-grid" style="margin-bottom:40px;">
+      <div class="stats-card">
+        <div class="stats-number" th:text="${tattoos != null ? tattoos.size() : 0}">0</div>
+        <div class="stats-label">Total Designs</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-number" th:text="${bookings != null ? bookings.size() : 0}">0</div>
+        <div class="stats-label">Total Bookings</div>
+      </div>
+      <div class="stats-card">
+        <div class="stats-number"
+             th:text="${bookings != null ? #lists.size(bookings.?[status == 'PENDING']) : 0}">0</div>
+        <div class="stats-label">Pending</div>
+      </div>
+      <div class="stats-card" style="border-left-color:var(--success);">
+        <div class="stats-number" style="color:var(--success);"
+             th:text="${bookings != null ? #lists.size(bookings.?[status == 'APPROVED']) : 0}">0</div>
+        <div class="stats-label">Approved</div>
+      </div>
+    </div>
+
+    <!-- ── MANAGE TATTOOS ─────────────────────────────────── -->
+    <div id="tattoos" style="margin-bottom:48px;">
+      <div class="page-header" style="margin-bottom:16px;">
+        <h2 style="color:var(--text-primary);font-size:1.2rem;font-weight:700;">Manage Tattoos</h2>
+        <a href="/admin/add-tattoo" class="btn btn-outline btn-sm">+ Add New</a>
+      </div>
+
+      <div th:if="${tattoos == null or tattoos.isEmpty()}"
+           style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+                  padding:40px;text-align:center;color:var(--text-muted);">
+        No tattoo designs yet. <a href="/admin/add-tattoo" style="color:var(--accent);">Add your first design →</a>
+      </div>
+
+      <div style="overflow-x:auto;" th:unless="${tattoos == null or tattoos.isEmpty()}">
+        <table class="table-premium">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Design Name</th>
+              <th>Style</th>
+              <th>Price</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="t : ${tattoos}">
+              <td>
+                <img th:if="${t.imageUrl != null and !t.imageUrl.isEmpty()}"
+                     th:src="${t.imageUrl}" th:alt="${t.designName}"
+                     style="width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid var(--border);">
+                <div th:unless="${t.imageUrl != null and !t.imageUrl.isEmpty()}"
+                     style="width:56px;height:56px;background:var(--bg-elevated);border-radius:8px;
+                            display:flex;align-items:center;justify-content:center;
+                            color:var(--text-muted);font-size:0.7rem;">No img</div>
+              </td>
+              <td style="font-weight:600;" th:text="${t.designName}">Name</td>
+              <td><span class="card-style" th:text="${t.style}">Style</span></td>
+              <td style="color:var(--accent);font-weight:700;">₹<span th:text="${t.price}">0</span></td>
+              <td>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <a th:href="@{/admin/edit-tattoo/{id}(id=${t.id})}"
+                     class="btn btn-outline btn-sm">Edit</a>
+                  <form th:action="@{/admin/delete/{id}(id=${t.id})}" method="post"
+                        class="delete-form" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ── TESTIMONIALS ──────────────────────────────────── -->
+    <div id="testimonials" style="margin-bottom:48px;">
+      <div class="page-header" style="margin-bottom:16px;">
+        <h2 style="color:var(--text-primary);font-size:1.2rem;font-weight:700;">What Our Clients Say</h2>
+      </div>
+
+      <!-- Edit form -->
+      <div th:if="${editTestimonial != null}"
+           style="background:rgba(225,29,72,0.08);border:1px solid var(--accent);border-radius:var(--radius);padding:20px;margin-bottom:20px;">
+        <h3 style="color:var(--accent);font-size:1rem;font-weight:600;margin-bottom:16px;">✏️ Edit Testimonial</h3>
+        <form th:action="@{/admin/edit-testimonial/{id}(id=${editTestimonial.id})}" method="post">
+          <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Customer Name</label>
+              <input type="text" name="customerName" class="form-control" th:value="${editTestimonial.customerName}" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Location</label>
+              <input type="text" name="location" class="form-control" th:value="${editTestimonial.location}">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Rating</label>
+              <input type="number" name="rating" class="form-control" min="1" max="5" th:value="${editTestimonial.rating}" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Review Text</label>
+            <textarea name="reviewText" class="form-control" rows="3" th:text="${editTestimonial.reviewText}" required></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button type="submit" class="btn btn-primary btn-sm">Update</button>
+            <a href="/admin/dashboard#testimonials" class="btn btn-outline btn-sm">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Add form -->
+      <div class="form-box" style="max-width:100%;margin-bottom:24px;padding:24px;">
+        <h3 style="color:var(--text-primary);font-size:1rem;font-weight:600;margin-bottom:16px;">➕ Add Testimonial</h3>
+        <form action="/admin/add-testimonial" method="post">
+          <div style="display:grid;grid-template-columns:1fr 1fr 80px;gap:12px;margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Customer Name</label>
+              <input type="text" name="customerName" class="form-control" placeholder="e.g. Arjun Mehta" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Location</label>
+              <input type="text" name="location" class="form-control" placeholder="e.g. Mumbai">
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Rating</label>
+              <input type="number" name="rating" class="form-control" min="1" max="5" value="5" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Review Text</label>
+            <textarea name="reviewText" class="form-control" rows="3" placeholder="Customer's review..." required></textarea>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">Add Testimonial</button>
+        </form>
+      </div>
+
+      <!-- List -->
+      <div th:if="${testimonials != null and !testimonials.isEmpty()}" style="overflow-x:auto;">
+        <table class="table-premium">
+          <thead>
+            <tr><th>Name</th><th>Location</th><th>Rating</th><th>Review</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="tm : ${testimonials}">
+              <td style="font-weight:600;" th:text="${tm.customerName}">Name</td>
+              <td style="color:var(--text-muted);" th:text="${tm.location}">Location</td>
+              <td style="color:var(--accent);" th:text="${tm.rating} + '★'">5★</td>
+              <td style="max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);font-size:0.85rem;"
+                  th:text="${tm.reviewText}">Review</td>
+              <td>
+                <div style="display:flex;gap:8px;">
+                  <a th:href="@{/admin/edit-testimonial/{id}(id=${tm.id})}" class="btn btn-outline btn-sm">Edit</a>
+                  <form th:action="@{/admin/delete-testimonial/{id}(id=${tm.id})}" method="post"
+                        class="delete-form" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div th:unless="${testimonials != null and !testimonials.isEmpty()}"
+           style="color:var(--text-muted);font-size:0.9rem;padding:16px 0;">
+        No testimonials yet. Add one above.
+      </div>
+    </div>
+
+    <!-- ── VIDEO REVIEWS ─────────────────────────────────── -->
+    <div id="video-reviews" style="margin-bottom:48px;">
+      <div class="page-header" style="margin-bottom:16px;">
+        <h2 style="color:var(--text-primary);font-size:1.2rem;font-weight:700;">Video Reviews</h2>
+      </div>
+
+      <!-- Edit form (shown when editReview is set) -->
+      <div th:if="${editReview != null}"
+           style="background:rgba(225,29,72,0.08);border:1px solid var(--accent);border-radius:var(--radius);padding:20px;margin-bottom:20px;">
+        <h3 style="color:var(--accent);font-size:1rem;font-weight:600;margin-bottom:16px;">✏️ Edit Review</h3>
+        <form th:action="@{/admin/edit-video-review/{id}(id=${editReview.id})}" method="post">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Reviewer Name</label>
+              <input type="text" name="reviewerName" class="form-control" th:value="${editReview.reviewerName}" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Rating (1-5)</label>
+              <input type="number" name="rating" class="form-control" min="1" max="5" th:value="${editReview.rating}" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Feedback</label>
+            <input type="text" name="feedback" class="form-control" th:value="${editReview.feedback}" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Embed Code (Instagram / YouTube iframe)</label>
+            <textarea name="embedCode" class="form-control" rows="4"
+                      th:text="${editReview.embedCode}" required></textarea>
+          </div>
+          <div style="display:flex;gap:8px;">
+            <button type="submit" class="btn btn-primary btn-sm">Update Review</button>
+            <a href="/admin/dashboard" class="btn btn-outline btn-sm">Cancel</a>
+          </div>
+        </form>
+      </div>
+
+      <!-- Add Video Review Form -->
+      <div class="form-box" style="max-width:100%;margin-bottom:24px;padding:24px;">
+        <h3 style="color:var(--text-primary);font-size:1rem;font-weight:600;margin-bottom:16px;">➕ Add Video / Photo Review</h3>
+        <form action="/admin/add-video-review" method="post">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px;">
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Reviewer Name</label>
+              <input type="text" name="reviewerName" class="form-control" placeholder="Customer name" required>
+            </div>
+            <div class="form-group" style="margin:0;">
+              <label class="form-label">Rating (1-5)</label>
+              <input type="number" name="rating" class="form-control" min="1" max="5" value="5" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Short Feedback</label>
+            <input type="text" name="feedback" class="form-control" placeholder="One line feedback..." required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Embed Code</label>
+            <textarea name="embedCode" class="form-control" rows="5"
+                      placeholder="Paste Instagram embed code OR YouTube iframe code here..."></textarea>
+            <span style="color:var(--text-muted);font-size:0.8rem;margin-top:4px;display:block;">
+              📸 Instagram: Post → ··· → Embed → copy full code<br>
+              ▶️ YouTube: Share → Embed → copy full &lt;iframe&gt; code
+            </span>
+          </div>
+          <button type="submit" class="btn btn-primary btn-sm">Add Review</button>
+        </form>
+      </div>
+
+      <!-- Video Reviews List -->
+      <div th:if="${videoReviews != null and !videoReviews.isEmpty()}" style="overflow-x:auto;">
+        <table class="table-premium">
+          <thead>
+            <tr><th>Reviewer</th><th>Rating</th><th>Feedback</th><th>Embed Preview</th><th>Actions</th></tr>
+          </thead>
+          <tbody>
+            <tr th:each="vr : ${videoReviews}">
+              <td style="font-weight:600;" th:text="${vr.reviewerName}">Name</td>
+              <td style="color:var(--accent);" th:text="${vr.rating} + '★'">5★</td>
+              <td th:text="${vr.feedback}">Feedback</td>
+              <td style="max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:var(--text-muted);font-size:0.75rem;"
+                  th:text="${vr.embedCode != null and #strings.length(vr.embedCode) > 60 ? #strings.substring(vr.embedCode, 0, 60) + '...' : (vr.embedCode != null ? vr.embedCode : '-')}"
+                  th:title="${vr.embedCode}">code</td>
+              <td>
+                <div style="display:flex;gap:8px;">
+                  <a th:href="@{/admin/edit-video-review/{id}(id=${vr.id})}"
+                     class="btn btn-outline btn-sm">Edit</a>
+                  <form th:action="@{/admin/delete-video-review/{id}(id=${vr.id})}" method="post"
+                        class="delete-form" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div th:unless="${videoReviews != null and !videoReviews.isEmpty()}"
+           style="color:var(--text-muted);font-size:0.9rem;padding:16px 0;">
+        No reviews yet. Add one above.
+      </div>
+    </div>
+    <div id="bookings">
+      <div class="page-header" style="margin-bottom:16px;">
+        <h2 style="color:var(--text-primary);font-size:1.2rem;font-weight:700;">Manage Bookings</h2>
+      </div>
+
+      <div th:if="${bookings == null or bookings.isEmpty()}"
+           style="background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius);
+                  padding:40px;text-align:center;color:var(--text-muted);">
+        No bookings yet.
+      </div>
+
+      <div style="overflow-x:auto;" th:unless="${bookings == null or bookings.isEmpty()}">
+        <table class="table-premium">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Phone</th>
+              <th>Email</th>
+              <th>Tattoo</th>
+              <th>Date</th>
+              <th>Status</th>
+              <th>Ref Image</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="b : ${bookings}">
+              <td style="font-weight:600;" th:text="${b.customerName}">Name</td>
+              <td th:text="${b.phone}">Phone</td>
+              <td th:text="${b.email}">Email</td>
+              <td th:text="${b.tattoo != null ? b.tattoo.designName : '-'}">Tattoo</td>
+              <td style="color:var(--text-muted);font-size:0.85rem;" th:text="${b.bookingDate}">Date</td>
+              <td>
+                <span th:class="${'badge badge-' + b.status.toLowerCase()}"
+                      th:text="${b.status}">PENDING</span>
+              </td>
+              <td>
+                <a th:if="${b.referenceImageUrl != null and !b.referenceImageUrl.isEmpty()}"
+                   th:href="${b.referenceImageUrl}" target="_blank"
+                   style="color:var(--accent);font-size:0.85rem;">View</a>
+                <span th:unless="${b.referenceImageUrl != null and !b.referenceImageUrl.isEmpty()}"
+                      style="color:var(--text-muted);font-size:0.85rem;">—</span>
+              </td>
+              <td>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                  <a th:if="${b.status == 'PENDING'}"
+                     th:href="@{/admin/approve/{id}(id=${b.id})}"
+                     class="btn btn-success btn-sm">Approve</a>
+                  <a th:if="${b.status == 'PENDING'}"
+                     th:href="@{/admin/reject/{id}(id=${b.id})}"
+                     class="btn btn-danger btn-sm">Reject</a>
+                  <span th:unless="${b.status == 'PENDING'}"
+                        style="color:var(--text-muted);font-size:0.85rem;"
+                        th:text="${b.status}">—</span>
+                  <form th:action="@{/admin/delete-booking/{id}(id=${b.id})}" method="post"
+                        class="delete-form" style="display:inline;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                  </form>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<script src="/js/app.js"></script>
+<script>
+  // Scroll to anchor on page load
+  if (window.location.hash) {
+    setTimeout(function() {
+      var el = document.querySelector(window.location.hash);
+      if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }, 200);
+  }
+</script>
+</body>
+</html>

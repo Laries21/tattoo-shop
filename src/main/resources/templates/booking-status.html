@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Track Your Booking — Clarity Tattoo</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="bg-floats"></div>
+<div class="watermark">✦ Ramesh Balu</div>
+
+<!-- NAVBAR -->
+<nav class="navbar">
+  <a href="/" class="navbar-logo" style="display:flex;align-items:center;gap:10px;">
+    <img src="/uploads/images/logo/clarity-logo.png" alt="Clarity Tattoo"
+         class="navbar-logo-img" onerror="this.style.display='none'">
+    <span>Clarity Tattoo</span>
+  </a>
+  <button class="hamburger" aria-label="Toggle menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="nav-links">
+    <a href="/">Home</a>
+    <a href="/tattoos">Explore Tattoos</a>
+    <a href="/tattoos" class="btn btn-primary btn-sm">Book Now</a>
+    <a href="/booking-status">Track Booking</a>
+    <a href="/admin/login" title="Studio Portal" style="font-size:1.1rem;opacity:0.5;">⚙</a>
+  </div>
+</nav>
+
+<!-- PAGE HEADER -->
+<div style="background:var(--bg-card);border-bottom:1px solid var(--border);padding:48px 60px 40px;">
+  <div style="max-width:1200px;margin:0 auto;">
+    <h1 style="color:var(--text-primary);font-size:2.5rem;font-weight:800;letter-spacing:-0.03em;margin-bottom:12px;">
+      Track Your <span style="color:var(--accent);">Booking</span>
+    </h1>
+    <p style="color:var(--text-muted);font-size:1rem;max-width:560px;line-height:1.7;">
+      Enter your email address or phone number to check the status of your tattoo booking.
+    </p>
+  </div>
+</div>
+
+<!-- SEARCH + RESULTS -->
+<div class="section">
+
+  <!-- Search Form -->
+  <div class="status-search-box">
+    <form action="/booking-status" method="post">
+      <div class="form-group">
+        <label class="form-label" for="query">Email Address or Phone Number</label>
+        <div style="display:flex;gap:12px;">
+          <input type="text" id="query" name="query" class="form-control"
+                 placeholder="Enter your email or 10-digit phone"
+                 th:value="${query}" required style="flex:1;">
+          <button type="submit" class="btn btn-primary" style="white-space:nowrap;">
+            Search →
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+
+  <!-- Results -->
+  <div th:if="${bookings != null}">
+
+    <!-- No results -->
+    <div th:if="${bookings.isEmpty()}"
+         style="text-align:center;padding:60px 20px;background:var(--bg-card);
+                border:1px solid var(--border);border-radius:var(--radius);">
+      <div style="font-size:3rem;margin-bottom:16px;">🔍</div>
+      <h3 style="color:var(--text-primary);margin-bottom:8px;">No bookings found</h3>
+      <p style="color:var(--text-muted);">
+        No bookings match "<strong th:text="${query}">your query</strong>".
+        Please check your email or phone number and try again.
+      </p>
+    </div>
+
+    <!-- Results table -->
+    <div th:unless="${bookings.isEmpty()}">
+      <h3 style="color:var(--text-primary);font-size:1.1rem;font-weight:600;margin-bottom:16px;">
+        Found <span th:text="${bookings.size()}">0</span> booking(s)
+      </h3>
+
+      <div style="overflow-x:auto;">
+        <table class="table-premium">
+          <thead>
+            <tr>
+              <th>Tattoo Design</th>
+              <th>Style</th>
+              <th>Booking Date</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr th:each="b : ${bookings}">
+              <td style="font-weight:600;"
+                  th:text="${b.tattoo != null ? b.tattoo.designName : 'Unknown'}">Design</td>
+              <td>
+                <span class="card-style"
+                      th:text="${b.tattoo != null ? b.tattoo.style : '-'}">Style</span>
+              </td>
+              <td style="color:var(--text-muted);font-size:0.85rem;"
+                  th:text="${b.bookingDate}">Date</td>
+              <td>
+                <span th:class="${'badge badge-' + b.status.toLowerCase()}"
+                      th:text="${b.status}">PENDING</span>
+                <div style="margin-top:6px;font-size:0.8rem;color:var(--text-muted);">
+                  <span th:if="${b.status == 'PENDING'}">⏳ Awaiting admin review</span>
+                  <span th:if="${b.status == 'APPROVED'}">✅ Your booking is confirmed!</span>
+                  <span th:if="${b.status == 'REJECTED'}">❌ Booking was not approved</span>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Info box (before search) -->
+  <div th:unless="${bookings != null}"
+       style="text-align:center;padding:60px 20px;background:var(--bg-card);
+              border:1px solid var(--border);border-radius:var(--radius);margin-top:32px;">
+    <div style="font-size:3rem;margin-bottom:16px;">📋</div>
+    <h3 style="color:var(--text-primary);margin-bottom:8px;">Check Your Booking Status</h3>
+    <p style="color:var(--text-muted);max-width:400px;margin:0 auto;line-height:1.7;">
+      After submitting a booking, use your email or phone number above to track whether it's been approved or rejected.
+    </p>
+  </div>
+
+</div>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="footer-links">
+    <a href="/">Home</a>
+    <a href="/tattoos">Explore Tattoos</a>
+    <a href="/booking-status">Track Booking</a>
+    <a href="/admin/login" title="Studio Portal" style="opacity:0.5;">⚙</a>
+  </div>
+  <p>© 2026 Clarity Tattoo. All rights reserved.</p>
+</footer>
+
+<script src="/js/app.js"></script>
+</body>
+</html>
